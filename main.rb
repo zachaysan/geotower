@@ -2,6 +2,7 @@ $: << File.dirname(__FILE__) unless $:.include? File.dirname(__FILE__)
 require "rubygame"
 require "monsters.rb"
 require "towers.rb"
+require "shots.rb"
 include Rubygame
 include Rubygame::Events
 include Rubygame::EventActions
@@ -21,6 +22,8 @@ class Game
     make_queue
     make_event_hooks
     make_towers
+    make_monsters
+    make_shots
   end
   def go
     catch(:quit) do
@@ -32,10 +35,21 @@ class Game
 
   private
   
+  def make_monsters
+    @monsters = []
+    @monsters.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )} unless @monsters.empty?
+  end
+
   def make_towers
     @towers = []
     @towers << Tower.new(200,200,"images/tower.png",:testing_tower,:me)
     @towers.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
+  end
+
+  def make_shots
+    @shots = []
+
+    @shots.each {|shot| make_magic_hooks_for( shot, { YesTrigger.new() => :handle } )} unless @shots.empty?
   end
   
   def make_clock
@@ -75,16 +89,49 @@ class Game
     puts "Quitting!"
     throw :quit
   end
+  def get_all_monster_coordinates(monsters)
+    collector = []
+    @monsters.each_with_index do |monster, index|
+      collector << [monster.px, monster.py, monster.name, monster.hp, index]
+    end
+    collector
+  end
+  def generate_new_monster
+    if rand < 0.02
+      @monsters << Monster.new(180, 0, 0, 50, "images/monster.png", :test_monster, :game)
+      make_magic_hooks_for( @monsters[-1], { YesTrigger.new() => :handle } )
+    end
+  end
+  def fire_shots
+    @towers.each do |tower|
+      if tower.fire_shot
+        @shots << Shot.new( tower.px, tower.py, tower.fire_shot, :simple_shot, :me)
+        make_magic_hooks_for(  @shots[-1], { YesTrigger.new() => :handle } )
+        tower.fire_shot = nil
+      end
+    end
+  end
   def step
+    
+    generate_new_monster
+    
     @background = Surface.load "images/background.png"
     @background.blit @screen, [ 0, 0]
 
     # Fetch input events, etc. from SDL, and add them to the queue.
     @queue.fetch_sdl_events
- 
+    
     # Tick the clock and add the TickEvent to the queue.
     @queue << @clock.tick
- 
+    
+    current_monster_positions = get_all_monster_coordinates(@monsters)
+    
+    @towers.each do |tower|
+      tower.look_for_monsters current_monster_positions
+    end
+    
+    fire_shots
+    
     # Process all the events on the queue.
     @queue.each do |event|
       handle( event )
@@ -93,6 +140,7 @@ class Game
     # Draw the ship in its new position.
     @towers.each {|tower| tower.draw(@screen)} unless @towers.nil?
     @monsters.each {|monster| monster.draw(@screen)} unless @monsters.nil?
+    @shots.each {|shot| shot.draw(@screen)} unless @shots.nil?
     # Refresh the screen.
 
     @screen.update()
