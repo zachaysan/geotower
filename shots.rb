@@ -1,35 +1,32 @@
 require "rubygame"
+require "pp"
 include Rubygame
 include Rubygame::Events
 include Rubygame::EventActions
 include Rubygame::EventTriggers
-class Monster
+class Shot
   include Sprites::Sprite
   include EventHandler::HasEventHandler
-  # where the monstor is on the map
+
   attr_reader :px, :py
-  # the name and information of the monstor
-  attr_accessor :owner, :name, :hp
-  # the acceleration of the creature
+  attr_accessor :name, :target
   attr_accessor :ax, :ay
-  def initialize( px, py, vx, vy, image, name, owner )
-    @px, @py = px, py # Current Position
-    @vx, @vy = vx, vy # Current Velocity
-    
-    @ax, @ay = 0, 0 # Current Acceleration
+  def initialize( px, py, target, name, owner )
+    @px, @py = px, py 
+    @target = target
+    @max_speed = 50.0
+
+    @ax, @ay = 0, 0 # may be needed for missiles that accel
     @name = name
-    @max_speed = 600.0 # Max speed on an axis
-    @accel = 0.0 # Max Acceleration on an axis
-    @slowdown = 0.0 # Deceleration when not accelerating
+
+    @accel = 0.0
+    @slowdown = 0.0
     
-    @hp = (rand * 50 + 50.0)
-    
-    @keys = [] # Keys being pressed (might not be useful)
-  
     # how the monstor looks
-    @image = Surface.load image
+
+    @image = Surface.load "images/shot.png"
     @rect = @image.make_rect
-  
+    
     # Create event hooks in the easiest way.
     # These will probably not be needed in *most*
     # monster usecases, but there might be some wierd
@@ -41,46 +38,34 @@ class Monster
        # Send ClockTicked events to #update() this is built into the make_magic_hooks code
       ClockTicked => :update
      )
+    update_targeted_vel
   end
-  def update_image(image)
-    @image = Surface.load image unless image.nil?
+  def update_targeted_vel
+    # similar_triangles  
+    ratio_x = @px - @target[0]
+    ratio_y = @py - @target[1]
+    ratio_h = (ratio_x**2 + ratio_y**2)**0.5
+    @vx = @max_speed * (ratio_x / ratio_h)
+    @vy = @max_speed * (ratio_y / ratio_h)
+
   end
 
-  private
+  def update_view
+    # @view = Surface.draw_circle_s([@px,@py], 3, :red)
+  end
 
-  # Add it to the list of keys being pressed.
-  def key_pressed( event )
-    @keys += [event.key]
-  end
-  # Remove it from the list of keys being pressed.
-  def key_released( event )
-    @keys -= [event.key]
-  end
-  # Update the ship state. Called once per frame.
+  # Update the shot's state. Called once per frame.
   def update( event )
     dt = event.seconds # Time since last update
     # do nothing else for now
+    update_targeted_vel
     update_accel
     update_vel( dt )
     update_pos( dt )
   end
   # Update the acceleration based on what keys are pressed.
   def update_accel
-    user_controlling = false
-    if user_controlling
-      x, y = 0,0
-      x -= 1 if @keys.include?( :left )
-      x += 1 if @keys.include?( :right )
-      y -= 1 if @keys.include?( :up ) # up is down in screen coordinates
-      y += 1 if @keys.include?( :down )
-      x *= @accel
-      y *= @accel
-      # Scale to the acceleration rate. This is a bit unrealistic, since
-      # it doesn't consider magnitude of x and y combined (diagonal).
-      @ax, @ay = x, y
-    else
-      @ax, @ay = @accel, @accel
-    end
+    @ax, @ay = @accel, @accel
   end
   # Update the velocity based on the acceleration and the time since
   # last update.
@@ -118,5 +103,6 @@ class Monster
     @px += @vx * dt
     @py += @vy * dt
     @rect.center = [@px, @py]
+    puts "#{@px} , #{@py}"
   end
 end

@@ -1,4 +1,5 @@
 require "rubygame"
+require "pp"
 include Rubygame
 include Rubygame::Events
 include Rubygame::EventActions
@@ -8,6 +9,8 @@ class Tower
   include EventHandler::HasEventHandler
   attr_reader :px, :py
   attr_accessor :owner, :name
+  
+  attr_accessor :current_monsters_in_range, :current_target, :fire_shot
   def initialize( px, py, image, name, owner )
     @px, @py = px, py
     @normal_state = image
@@ -20,13 +23,24 @@ class Tower
     @rest = 0
     @cooldown = 2.50
     @fire_time = 1.00
+    @range = 50
+    @current_target = []
   end
   def update(event)
     dt = event.seconds # time since last update
     aim(dt)
   end
+  def look_for_monsters(current_monster_positions)
+    @current_monsters_in_range = []
+    current_monster_positions.each do |monster_position|
+      m_px, m_py, m_name, m_hp, m_index = monster_position
+      @current_monsters_in_range << monster_position if in_range?(m_px, m_py)
+    end
+  end
+  def in_range?(x, y)
+    ((x-@px)**2 + (y-@py)**2) < @range**2
+  end
   def aim(dt)
-    puts @rest
     @rest -= dt
     return fire_if_target if @rest < 0
     return continue_firing if @rest > @cooldown - @fire_time
@@ -41,10 +55,29 @@ class Tower
   def fire_if_target
     return nil unless scan_for_target
     update_image "images/tower-firing.png"
+    @fire_shot = @current_target
     @rest = @cooldown
   end
   def scan_for_target
-    true
+    if @current_monsters_in_range.empty?
+      @current_target = []
+      pp @current_monsters_in_range
+      pp @current_target
+      false
+    else
+      find_good_target
+      pp @current_monsters_in_range
+      pp @current_target
+      true
+    end
+
+  end
+  def find_good_target
+    @current_target 
+    @current_monsters_in_range.sort! do |x,y|
+      x[3] <=> y[3]
+    end
+    @current_target = @current_monsters_in_range[0]
   end
   def update_image(image)
     @image = Surface.load image unless image.nil?
