@@ -1,6 +1,7 @@
 $: << File.dirname(__FILE__) unless $:.include? File.dirname(__FILE__)
 require "rubygame"
 require "monsters.rb"
+require "towers.rb"
 include Rubygame
 include Rubygame::Events
 include Rubygame::EventActions
@@ -19,6 +20,7 @@ class Game
     make_clock
     make_queue
     make_event_hooks
+    make_towers
   end
   def go
     catch(:quit) do
@@ -29,7 +31,13 @@ class Game
   end
 
   private
- 
+  
+  def make_towers
+    @towers = []
+    @towers << Tower.new(200,200,"images/tower.png",:testing_tower,:me)
+    @towers.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
+  end
+  
   def make_clock
     @clock = Clock.new()
     @clock.target_framerate = 50
@@ -83,6 +91,7 @@ class Game
     end
     
     # Draw the ship in its new position.
+    @towers.each {|tower| tower.draw(@screen)} unless @towers.nil?
     @monsters.each {|monster| monster.draw(@screen)} unless @monsters.nil?
     # Refresh the screen.
 
