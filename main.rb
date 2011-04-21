@@ -90,10 +90,10 @@ class Game
     puts "Quitting!"
     throw :quit
   end
-  def get_all_monster_coordinates(monsters)
+  def get_all_monster_coordinates
     collector = []
     @monsters.each_with_index do |monster, index|
-      collector << [monster.px, monster.py, monster.name, monster.hp, index]
+      collector << [monster.public_method(:px), monster.public_method(:py), monster.public_method(:name), monster.public_method(:hp), index]
     end
     collector
   end
@@ -127,7 +127,7 @@ class Game
     # Tick the clock and add the TickEvent to the queue.
     @queue << @clock.tick
     
-    current_monster_positions = get_all_monster_coordinates(@monsters)
+    current_monster_positions = get_all_monster_coordinates
     
     @towers.each do |tower|
       tower.look_for_monsters current_monster_positions

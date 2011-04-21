@@ -34,7 +34,7 @@ class Tower
     @current_monsters_in_range = []
     current_monster_positions.each do |monster_position|
       m_px, m_py, m_name, m_hp, m_index = monster_position
-      @current_monsters_in_range << monster_position if in_range?(m_px, m_py)
+      @current_monsters_in_range << monster_position if in_range?(m_px.call, m_py.call)
     end
   end
   def in_range?(x, y)
@@ -75,7 +75,7 @@ class Tower
   def find_good_target
     @current_target 
     @current_monsters_in_range.sort! do |x,y|
-      x[3] <=> y[3]
+      x[3].call <=> y[3].call
     end
     @current_target = @current_monsters_in_range[0]
   end
