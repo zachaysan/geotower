@@ -42,11 +42,14 @@ class Shot
   end
   def update_targeted_vel
     # similar_triangles  
-    ratio_x = @px - @target[0]
-    ratio_y = @py - @target[1]
+    sign_x, sign_y = 1,1
+    sign_x = -1 if @target[0].call > 0
+    sign_y = -1 if @target[1].call > 0
+    ratio_x = @px - @target[0].call
+    ratio_y = @py - @target[1].call
     ratio_h = (ratio_x**2 + ratio_y**2)**0.5
-    @vx = @max_speed * (ratio_x / ratio_h)
-    @vy = @max_speed * (ratio_y / ratio_h)
+    @vx = @max_speed * (ratio_x / ratio_h) * sign_x
+    @vy = @max_speed * (ratio_y / ratio_h) * sign_y
 
   end
 
@@ -103,6 +106,5 @@ class Shot
     @px += @vx * dt
     @py += @vy * dt
     @rect.center = [@px, @py]
-    puts "#{@px} , #{@py}"
   end
 end

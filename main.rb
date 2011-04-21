@@ -37,12 +37,13 @@ class Game
   
   def make_monsters
     @monsters = []
-    @monsters.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )} unless @monsters.empty?
+    @monsters.each {|monster| make_magic_hooks_for( monster, { YesTrigger.new() => :handle } )} unless @monsters.empty?
   end
 
   def make_towers
     @towers = []
     @towers << Tower.new(200,200,"images/tower.png",:testing_tower,:me)
+    @towers << Tower.new(200,400,"images/tower.png",:testing_tower,:me)
     @towers.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
   end
 
@@ -54,7 +55,7 @@ class Game
   
   def make_clock
     @clock = Clock.new()
-    @clock.target_framerate = 50
+    @clock.target_framerate = 80
     @clock.calibrate
     @clock.enable_tick_events
   end
@@ -89,10 +90,10 @@ class Game
     puts "Quitting!"
     throw :quit
   end
-  def get_all_monster_coordinates(monsters)
+  def get_all_monster_coordinates
     collector = []
     @monsters.each_with_index do |monster, index|
-      collector << [monster.px, monster.py, monster.name, monster.hp, index]
+      collector << [monster.public_method(:px), monster.public_method(:py), monster.public_method(:name), monster.public_method(:hp), index]
     end
     collector
   end
@@ -113,6 +114,8 @@ class Game
   end
   def step
     
+    puts @clock.framerate
+    
     generate_new_monster
     
     @background = Surface.load "images/background.png"
@@ -124,7 +127,7 @@ class Game
     # Tick the clock and add the TickEvent to the queue.
     @queue << @clock.tick
     
-    current_monster_positions = get_all_monster_coordinates(@monsters)
+    current_monster_positions = get_all_monster_coordinates
     
     @towers.each do |tower|
       tower.look_for_monsters current_monster_positions
