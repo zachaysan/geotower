@@ -37,12 +37,13 @@ class Game
   
   def make_monsters
     @monsters = []
-    @monsters.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )} unless @monsters.empty?
+    @monsters.each {|monster| make_magic_hooks_for( monster, { YesTrigger.new() => :handle } )} unless @monsters.empty?
   end
 
   def make_towers
     @towers = []
     @towers << Tower.new(200,200,"images/tower.png",:testing_tower,:me)
+    @towers << Tower.new(200,400,"images/tower.png",:testing_tower,:me)
     @towers.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
   end
 
@@ -54,7 +55,7 @@ class Game
   
   def make_clock
     @clock = Clock.new()
-    @clock.target_framerate = 50
+    @clock.target_framerate = 80
     @clock.calibrate
     @clock.enable_tick_events
   end
@@ -112,6 +113,8 @@ class Game
     end
   end
   def step
+    
+    puts @clock.framerate
     
     generate_new_monster
     

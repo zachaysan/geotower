@@ -21,8 +21,8 @@ class Tower
      )
     @rect.center = [@px,@py]
     @rest = 0
-    @cooldown = 2.50
-    @fire_time = 1.00
+    @cooldown = 0.50
+    @fire_time = 0.20
     @range = 50
     @current_target = []
   end
