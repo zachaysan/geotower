@@ -3,6 +3,7 @@ require "rubygame"
 require "monsters.rb"
 require "towers.rb"
 require "shots.rb"
+require "grid.rb"
 include Rubygame
 include Rubygame::Events
 include Rubygame::EventActions
@@ -44,6 +45,7 @@ class Game
     @towers = []
     @towers << Tower.new(200,200,"images/tower.png",:testing_tower,:me)
     @towers << Tower.new(200,400,"images/tower.png",:testing_tower,:me)
+    @towers << Tower.new(300,300,"images/tower.png",:testing_tower,:me)
     @towers.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
   end
 
@@ -82,7 +84,7 @@ class Game
   # Create the Rubygame window.
   def make_screen
     flags = [HWSURFACE, DOUBLEBUF] # FULLSCREEN will be added later
-    @screen = Screen.open( [700, 700], 0, flags )
+    @screen = Screen.open( [600, 900], 0, flags )
     @screen.title = "Rocketr in Space!"
   end
   # Quit the game
@@ -99,7 +101,7 @@ class Game
   end
   def generate_new_monster
     if rand < 0.02
-      @monsters << Monster.new(180, 0, 0, 50, "images/monster.png", :test_monster, :game)
+      @monsters << Monster.new(100 + 190*rand, 0, 0, 50, "images/monster.png", :test_monster, :game)
       make_magic_hooks_for( @monsters[-1], { YesTrigger.new() => :handle } )
     end
   end
