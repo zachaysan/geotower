@@ -14,9 +14,14 @@ class Grid
     end
     
     private
-    def snaps_even?(py)
+    def snaps_even?(py, px)
       if (py / (@w+@h).to_i).even?
-        # break out section coordinates
+        base = (2*r).to_i / px.to_i
+        px = px - base
+        base = (2*s).to_i / py.to_i
+        py = py - base
+        ratio = py.to_f / h.to_f
+
       end
     end
     def even_snapper
