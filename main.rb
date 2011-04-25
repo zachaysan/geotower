@@ -85,7 +85,7 @@ class Game
   def make_screen
     flags = [HWSURFACE, DOUBLEBUF] # FULLSCREEN will be added later
     @screen = Screen.open( [600, 900], 0, flags )
-    @screen.title = "Rocketr in Space!"
+    @screen.title = "Geotower for great good!"
   end
   # Quit the game
   def quit
