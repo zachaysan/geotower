@@ -14,7 +14,7 @@ class Shot
   def initialize( px, py, target, name, owner )
     @px, @py = px, py 
     @target = target
-    @max_speed = 50.0
+    @max_speed = 80.0
 
     @ax, @ay = 0, 0 # may be needed for missiles that accel
     @name = name
