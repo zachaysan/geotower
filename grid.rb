@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-require 'pp'
-
 class Hexagon
   attr_reader :height, :width
   def initialize(height)
@@ -51,5 +49,10 @@ class Grid
     end
     @grid_points
   end
+  def find_closest_hex(px, py)
+    closest_hex = Proc.new do |hex1, hex2|
+      ((hex1[0]-px)**2 + (hex1[1] - py)**2) <=> ((hex2[0]-px)**2 + (hex2[1] - py)**2)
+    end
+    @grid_points.sort(&closest_hex).first
+  end
 end
-

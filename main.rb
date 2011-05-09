@@ -4,6 +4,7 @@ require "monsters.rb"
 require "towers.rb"
 require "shots.rb"
 require "grid.rb"
+require "hover_tower.rb"
 include Rubygame
 include Rubygame::Events
 include Rubygame::EventActions
@@ -22,6 +23,8 @@ class Game
     make_clock
     make_queue
     make_event_hooks
+    make_grid
+    make_hover_tower
     make_towers
     make_monsters
     make_shots
@@ -40,7 +43,11 @@ class Game
     @monsters = []
     @monsters.each {|monster| make_magic_hooks_for( monster, { YesTrigger.new() => :handle } )} unless @monsters.empty?
   end
-
+  
+  def make_hover_tower
+    @hover_tower = HoverTower.new("images/hexagon.png", :bob, :me)
+  end
+  
   def make_towers
     @towers = []
     @towers << Tower.new(200,200,"images/tower.png",:testing_tower,:me)
@@ -51,7 +58,6 @@ class Game
 
   def make_shots
     @shots = []
-
     @shots.each {|shot| make_magic_hooks_for( shot, { YesTrigger.new() => :handle } )} unless @shots.empty?
   end
   
@@ -77,9 +83,6 @@ class Game
     # Create EventQueue with new-style events (added in Rubygame 2.4)
     @queue = EventQueue.new()
     @queue.enable_new_style_events
- 
-    # Don't care about mouse movement just yet (dev mode), so let's ignore it.
-    @queue.ignore = [MouseMoved]
   end
   # Create the Rubygame window.
   def make_screen
@@ -87,6 +90,10 @@ class Game
     @screen = Screen.open( [600, 900], 0, flags )
     @screen.title = "Geotower for great good!"
   end
+  def make_grid
+    @grid = Grid.new({})
+  end
+
   # Quit the game
   def quit
     puts "Quitting!"
@@ -114,6 +121,10 @@ class Game
       end
     end
   end
+  def move_hover_tower(px=nil, py=nil, image=nil)
+    hex_px, hex_py = @grid.find_closest_hex(px, py)
+    @hover_tower.update_image(hex_px, hex_py, image)
+  end
   def step
     
     puts @clock.framerate
@@ -122,12 +133,17 @@ class Game
     
     @background = Surface.load "images/background.png"
     @background.blit @screen, [ 0, 0]
-
+    
     # Fetch input events, etc. from SDL, and add them to the queue.
     @queue.fetch_sdl_events
     
     # Tick the clock and add the TickEvent to the queue.
     @queue << @clock.tick
+    if @mouse_px and @mouse_py
+      move_hover_tower(@mouse_px, @mouse_py)
+      @mouse_px = nil
+      @mouse_py = nil
+    end
     
     current_monster_positions = get_all_monster_coordinates
     
@@ -139,10 +155,16 @@ class Game
     
     # Process all the events on the queue.
     @queue.each do |event|
-      handle( event )
+      case(event)
+      when Events::MouseMoved
+        @mouse_px, @mouse_py = event.pos
+      else handle( event )
+      end
     end
     
     # Draw the ship in its new position.
+    @hover_tower.draw(@screen) unless @hover_tower.nil?
+
     @towers.each {|tower| tower.draw(@screen)} unless @towers.nil?
     @monsters.each {|monster| monster.draw(@screen)} unless @monsters.nil?
     @shots.each {|shot| shot.draw(@screen)} unless @shots.nil?
