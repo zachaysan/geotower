@@ -59,15 +59,11 @@ class Tower
     @rest = @cooldown
   end
   def scan_for_target
-    if @current_monsters_in_range.empty?
+    if @current_monsters_in_range.nil? or @current_monsters_in_range.empty?
       @current_target = []
-      pp @current_monsters_in_range
-      pp @current_target
       false
     else
       find_good_target
-      pp @current_monsters_in_range
-      pp @current_target
       true
     end
 

@@ -7,14 +7,14 @@ class HoverTower
   include Sprites::Sprite
   include EventHandler::HasEventHandler
   attr_accessor :px, :py
-  attr_accessor :owner, :name
+  attr_accessor :owner, :name, :active
   def initialize(image, name, owner )
     @image_path = image
     @name = name
     @owner = owner
     @image = Surface.load @image_path
     @rect = @image.make_rect
-    
+    @active = true
     make_magic_hooks( ClockTicked => :update  )
   end
   def normal_state
