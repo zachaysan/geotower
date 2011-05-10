@@ -50,9 +50,6 @@ class Game
   
   def make_towers
     @towers = []
-    @towers << Tower.new(200,200,"images/tower.png",:testing_tower,:me)
-    @towers << Tower.new(200,400,"images/tower.png",:testing_tower,:me)
-    @towers << Tower.new(300,300,"images/tower.png",:testing_tower,:me)
     @towers.each {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
   end
 
@@ -132,6 +129,16 @@ class Game
     hex_px, hex_py = @grid.find_closest_hex(px, py)
     @hover_tower.update_image(hex_px, hex_py, image)
   end
+  def clear_the_dead
+    to_clear = []
+    @monsters.each_with_index do |monster, index|
+      to_clear << index if monster.hp <= 0
+    end
+    to_clear.each do |index|
+      @monsters.delete_at(index)
+      @shots.delete_if {|shot| shot.target[4] == index}
+    end
+  end
   def handle_release
     if @hover_tower
       build_tower
@@ -179,6 +186,7 @@ class Game
     if @mouse_px and @mouse_py
       move_hover_tower(@mouse_px, @mouse_py)
     end
+    clear_the_dead
     @hover_tower.draw(@screen) unless @hover_tower.nil?
 
     @towers.each {|tower| tower.draw(@screen)} unless @towers.nil?
