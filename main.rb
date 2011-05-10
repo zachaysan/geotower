@@ -125,6 +125,15 @@ class Game
     hex_px, hex_py = @grid.find_closest_hex(px, py)
     @hover_tower.update_image(hex_px, hex_py, image)
   end
+  def handle_release
+    if @hover_tower
+      build_tower
+    end
+  end
+  def build_tower
+    @towers << Tower.new(@hover_tower.px,@hover_tower.py,"images/tower.png",:testing_tower,:me)
+    @towers.last.tap {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
+  end
   def step
     
     puts @clock.framerate
@@ -139,12 +148,6 @@ class Game
     
     # Tick the clock and add the TickEvent to the queue.
     @queue << @clock.tick
-    if @mouse_px and @mouse_py
-      move_hover_tower(@mouse_px, @mouse_py)
-      @mouse_px = nil
-      @mouse_py = nil
-    end
-    
     current_monster_positions = get_all_monster_coordinates
     
     @towers.each do |tower|
@@ -156,13 +159,19 @@ class Game
     # Process all the events on the queue.
     @queue.each do |event|
       case(event)
+      # we move mouse moved to its own event because it is faster
       when Events::MouseMoved
         @mouse_px, @mouse_py = event.pos
+      when Events::MouseReleased
+        handle_release
       else handle( event )
       end
     end
     
     # Draw the ship in its new position.
+    if @mouse_px and @mouse_py
+      move_hover_tower(@mouse_px, @mouse_py)
+    end
     @hover_tower.draw(@screen) unless @hover_tower.nil?
 
     @towers.each {|tower| tower.draw(@screen)} unless @towers.nil?
