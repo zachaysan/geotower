@@ -45,7 +45,9 @@ class Monster
   def update_image(image)
     @image = Surface.load image unless image.nil?
   end
-
+  def take_damage(damage)
+    @hp -= damage
+  end
   private
 
   # Add it to the list of keys being pressed.

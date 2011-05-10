@@ -15,10 +15,11 @@ class Shot
     @px, @py = px, py 
     @target = target
     @max_speed = 80.0
-
+    
     @ax, @ay = 0, 0 # may be needed for missiles that accel
     @name = name
-
+    @shot_damage_amount = 12.0
+    
     @accel = 0.0
     @slowdown = 0.0
     
@@ -48,9 +49,25 @@ class Shot
     ratio_x = @px - @target[0].call
     ratio_y = @py - @target[1].call
     ratio_h = (ratio_x**2 + ratio_y**2)**0.5
+
     @vx = @max_speed * (ratio_x / ratio_h) * sign_x
     @vy = @max_speed * (ratio_y / ratio_h) * sign_y
-
+    
+    if ratio_h < 6
+      explode_shot
+    end
+    
+  end
+  
+  def explode_shot
+    deal_damage
+    @image = Surface.load "images/shot-boom.png"
+    @rect = @image.make_rect
+    @rect.center = [@px, @py]
+  end
+  
+  def deal_damage
+    @target[5].call @shot_damage_amount
   end
 
   def update_view
@@ -103,8 +120,10 @@ class Shot
   # Update the position based on the velocity and the time since last
   # update.
   def update_pos( dt )
+    
     @px += @vx * dt
     @py += @vy * dt
+
     @rect.center = [@px, @py]
   end
 end

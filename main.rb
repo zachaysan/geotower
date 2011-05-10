@@ -101,8 +101,15 @@ class Game
   end
   def get_all_monster_coordinates
     collector = []
+    
+    # semi-hack. Will need to fix with a hash or something
     @monsters.each_with_index do |monster, index|
-      collector << [monster.public_method(:px), monster.public_method(:py), monster.public_method(:name), monster.public_method(:hp), index]
+      collector << [monster.public_method(:px), 
+                    monster.public_method(:py), 
+                    monster.public_method(:name), 
+                    monster.public_method(:hp), 
+                    index, 
+                    monster.public_method(:take_damage)]
     end
     collector
   end
