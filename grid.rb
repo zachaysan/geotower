@@ -67,10 +67,14 @@ class Grid
     @blocked_hexes[[px,py]] = true
   end
 
-  def find_closest_hex(px, py)
+  def find_closest_hex(px, py, specified = nil)
     closest_hex = Proc.new do |hex1, hex2|
       ((hex1[0]-px)**2 + (hex1[1] - py)**2) <=> ((hex2[0]-px)**2 + (hex2[1] - py)**2)
     end
-    @grid_points.sort(&closest_hex).first
+    unless specified 
+      @grid_points.sort(&closest_hex).first
+    else
+      @grid_points.sort(&closest_hex)[specified]
+    end
   end
 end
