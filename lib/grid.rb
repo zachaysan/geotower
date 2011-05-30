@@ -66,7 +66,9 @@ class Grid
   def block_hex(px, py)
     @blocked_hexes[[px,py]] = true
   end
-
+  def hex_is_blocked(hex)
+    !!@blocked_hexes[hex]
+  end
   def find_closest_hex(px, py, specified = nil)
     closest_hex = Proc.new do |hex1, hex2|
       ((hex1[0]-px)**2 + (hex1[1] - py)**2) <=> ((hex2[0]-px)**2 + (hex2[1] - py)**2)

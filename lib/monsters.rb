@@ -66,6 +66,10 @@ class Monster
     update_vel( dt )
     update_pos( dt )
   end
+  def get_new_course
+    
+  end
+
   # Update the acceleration based on what keys are pressed.
   def update_accel
     user_controlling = false

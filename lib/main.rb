@@ -5,6 +5,7 @@ require "towers.rb"
 require "shots.rb"
 require "grid.rb"
 require "hover_tower.rb"
+require "path.rb"
 include Rubygame
 include Rubygame::Events
 include Rubygame::EventActions
@@ -28,6 +29,8 @@ class Game
     make_towers
     make_monsters
     make_shots
+    make_path
+    make_goal
   end
   def go
     catch(:quit) do
@@ -90,7 +93,15 @@ class Game
   def make_grid
     @grid = Grid.new({})
   end
-
+  def make_path
+    @path = Path.new({:find_closest_hex => @grid.public_method(:find_closest_hex), 
+                       :hex_is_blocked => @grid.public_method(:hex_is_blocked)})
+  end
+  def make_goal
+    end_goal = [200,200]
+    hex_goal = @grid.find_closest_hex end_goal[0], end_goal[1]
+    @path.goal = hex_goal
+  end
   # Quit the game
   def quit
     puts "Quitting!"
@@ -147,6 +158,13 @@ class Game
   def build_tower
     @towers << Tower.new(@hover_tower.px,@hover_tower.py,"images/tower.png",:testing_tower,:me)
     @towers.last.tap {|tower| make_magic_hooks_for( tower, { YesTrigger.new() => :handle } )}
+  end
+  def repath
+    if @path.grid_changed
+      @monsters.each do |monster|
+        monster.get_new_course
+      end
+    end
   end
   def step
     
